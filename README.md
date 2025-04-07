@@ -2,14 +2,11 @@
 This repo is for building all addons of opencti & openbas that do not have ARM64 packages. No clue why they didn't do it.
 
 ## Usage
-To use this all you need to to is clone it and run the build_images.sh with the following params:
-```
-./build_images.sh <base_dir> <tag_prefix> <builder_name> <opencti_version> <openbas_version> <max_buids> <skip_builds>
-```
-* `<base_dir>`: base directory. In this case the main directory of the repo
-* `<tag_prefix>`: what comes before the `/` in a tag
-* `<builder_name>`: the name of the buildx builder
-* `<opencti_version>`: version of OpenCTI
-* `<openbas_version>`: version of OpenBAS
-* `<max_buids>`: Maximum builds to do. Usefull to not go over 6 hour limit for normal agent actions.
-* `<skip_builds>`: Builds to skip. Usefull to not go over 6 hour limit for normal agent actions.
+1. Fork this repo.
+2. Create a var for the username of docker hub
+3. Create a secret with the token for docker hub
+4. Go to Actions and perform a build action.
+5. Fill in the appropriate details and let it build.
+
+## Problems
+GitHub has a limit on the amount of time an action can take (6 hours). To get around this you can eighter configure the max & skip build options, or use your own agent.
