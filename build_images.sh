@@ -70,12 +70,12 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
 
     echo "🔨 Building $IMAGE_TAG from $service_dir for platforms: $PLATFORMS"
 
-    #docker buildx build \
-    #    --builder "$BUILDER_NAME" \
-    #    --platform "$PLATFORMS" \
-    #    -t "$IMAGE_TAG" \
-    #    --push \
-    #    "$service_dir"
+    docker buildx build \
+        --builder "$BUILDER_NAME" \
+        --platform "$PLATFORMS" \
+        -t "$IMAGE_TAG" \
+        --push \
+        "$service_dir"
 
     echo "✅ Successfully built and pushed $IMAGE_TAG"
 done
