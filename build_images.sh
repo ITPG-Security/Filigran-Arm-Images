@@ -13,12 +13,10 @@ TAG_PREFIX="${2:-rvoitpg}"
 BUILDER_NAME="$3"
 
 OPENCTI_VERSION="${4:-false}"
-BUILD_OPENCTI="${5:-false}"
-OPENBAS_VERSION="${6:-false}"
-BUILD_OPENBAS="${7:-false}"
+OPENBAS_VERSION="${5:-false}"
 
-MAX_BUILDS=${8:-100}
-SKIP_BUILDS=${9:-0}
+MAX_BUILDS=${6:-100}
+SKIP_BUILDS=${7:-0}
 
 # Ensure buildx builder exists
 if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
@@ -50,20 +48,12 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
     ORIGIONAL_REPO="NOTGOOD"
     SERVICE_PREFIX="NOTGOOD"
     if [ "${path_parts[1]}" == "OpenCTI" ]; then
-        if [ "${BUILD_OPENCTI}" == "false" ]; then
-            ctr=$((ctr - 1))
-            continue
-        fi
         ORIGIONAL_REPO="opencti"
         IMAGE_VERSION=$OPENCTI_VERSION
         if [ "${path_parts[2]}" == "Connectors" ]; then
             SERVICE_PREFIX="connector"
         fi
-    else 
-        if [ "${BUILD_OPENBAS}" == "false" ]; then
-            ctr=$((ctr - 1))
-            continue
-        fi
+    else
         ORIGIONAL_REPO="openbas"
         IMAGE_VERSION=$OPENBAS_VERSION
         if [ "${path_parts[2]}" == "Collectors" ]; then

@@ -44,8 +44,15 @@ jobs:
       # https://github.com/docker/setup-qemu-action
         with:
           fetch-depth: 0
-      - name: Checkout submodules
-        run: git submodule update --init --recursive --remote
+      - name: Obtain OpenCTI Connectors
+        if: ${{ inputs.openctiBuild }}
+        run: git clone --branch ${{ inputs.openctiVersion }} --single-branch https://github.com/OpenCTI-Platform/connectors.git
+      - name: Obtain OpenBAS Collectors
+        if: ${{ inputs.openbasBuild }}
+        run: git clone --branch ${{ inputs.openbasVersion }} --single-branch https://github.com/OpenBAS-Platform/collectors.git
+      - name: Obtain OpenBAS Injectors
+        if: ${{ inputs.openbasBuild }}
+        run: git clone --branch ${{ inputs.openbasVersion }} --single-branch https://github.com/OpenBAS-Platform/injectors.git
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -59,4 +66,4 @@ jobs:
       - name: Make the script file executable
         run: chmod +x build_images.sh
       - name: Run build script
-        run: ./build_images.sh . ${{ vars.DOCKERHUB_USERNAME }} ${{ steps.buildx.outputs.name }} ${{ inputs.openctiVersion }} ${{ inputs.openctiBuild }} ${{ inputs.openbasVersion }} ${{ inputs.openbasBuild }} ${{ inputs.maxBuild }} ${{ inputs.skipBuild }}
+        run: ./build_images.sh . ${{ vars.DOCKERHUB_USERNAME }} ${{ steps.buildx.outputs.name }} ${{ inputs.openctiVersion }} ${{ inputs.openbasVersion }} ${{ inputs.maxBuild }} ${{ inputs.skipBuild }}
