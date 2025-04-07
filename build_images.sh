@@ -17,6 +17,9 @@ BUILD_OPENCTI="${5:-false}"
 OPENBAS_VERSION="${6:-false}"
 BUILD_OPENBAS="${7:-false}"
 
+MAX_BUILDS=${8:-100}
+SKIP_BUILDS=${9:-0}
+
 # Ensure buildx builder exists
 if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
     echo "❌ Buildx builder '$BUILDER_NAME' does not exist."
@@ -28,13 +31,18 @@ docker buildx use "$BUILDER_NAME"
 # ------------------------
 # Find Dockerfiles recursively
 # ------------------------
+ctr=0
 find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
+    ctr=$((ctr + 1))
+
     service_dir=$(dirname "$dockerfile")
     
     # Filters out directories that shouldn't be parsed
     if [[ "$service_dir" =~ (/templates/|/shared/) ]]; then
+        ctr=$((ctr - 1))
         continue
     fi
+    buildNr=$((ctr - SKIP_BUILDS))
 
     # Extract category and service from the path
     path_parts=(${service_dir//\// })
@@ -43,6 +51,7 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
     SERVICE_PREFIX="NOTGOOD"
     if [ "${path_parts[1]}" == "OpenCTI" ]; then
         if [ "${BUILD_OPENCTI}" == "false" ]; then
+            ctr=$((ctr - 1))
             continue
         fi
         ORIGIONAL_REPO="opencti"
@@ -52,6 +61,7 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
         fi
     else 
         if [ "${BUILD_OPENBAS}" == "false" ]; then
+            ctr=$((ctr - 1))
             continue
         fi
         ORIGIONAL_REPO="openbas"
@@ -62,13 +72,17 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
             SERVICE_PREFIX="injector"
         fi
     fi
+    
+    if ((ctr <= SKIP_BUILDS)); then
+        continue
+    fi
 
     # Create image name
     IMAGE_NAME="${SERVICE_PREFIX}-${SERVICE}"
     IMAGE_TAG="${TAG_PREFIX}/${IMAGE_NAME}:${IMAGE_VERSION}"
 
 
-    echo "🔨 Building $IMAGE_TAG from $service_dir for platforms: $PLATFORMS"
+    echo "🔨 Building #${buildNr} $IMAGE_TAG from $service_dir for platforms: $PLATFORMS"
 
     docker buildx build \
         --builder "$BUILDER_NAME" \
@@ -77,5 +91,11 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
         --push \
         "$service_dir"
 
-    echo "✅ Successfully built and pushed $IMAGE_TAG"
+    echo "✅ Successfully built #${buildNr} and pushed $IMAGE_TAG"
+
+    if (((ctr - SKIP_BUILDS) >= MAX_BUILDS)); then
+        tmp=$((ctr - SKIP_BUILDS))
+        echo "🛑 Stopping due to max builds reached."
+        break
+    fi
 done
