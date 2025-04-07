@@ -1,9 +1,9 @@
 [submodule "OpenCTI/Connectors"]
 	path = OpenCTI/Connectors
-	url = git@github.com:OpenCTI-Platform/connectors.git
+	url = https://github.com/OpenCTI-Platform/connectors.git
 [submodule "OpenBAS/Injectors"]
 	path = OpenBAS/Injectors
-	url = git@github.com:OpenBAS-Platform/injectors.git
+	url = https://github.com/OpenBAS-Platform/injectors.git
 [submodule "OpenBAS/Collectors"]
 	path = OpenBAS/Collectors
-	url = git@github.com:OpenBAS-Platform/collectors.git
+	url = https://github.com/OpenBAS-Platform/collectors.git
