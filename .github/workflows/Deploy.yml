@@ -1,0 +1,52 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      openctiVersion:
+        description: 'OpenCTI Version'
+        required: true
+        default: '6.5.10'
+        type: string
+      openctiBuild:
+        description: 'If OpenCTI images should be build'
+        required: false
+        type: boolean
+      openbasVersion:
+        description: 'OpenBAS Version'
+        required: true
+        default: '1.15.0'
+        type: string
+      openbasBuild:
+        description: 'If OpenBAS images should be build'
+        required: false
+        type: boolean
+      
+
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      # Add support for more platforms with QEMU (optional)
+      # https://github.com/docker/setup-qemu-action
+        with:
+          fetch-depth: 0
+      - name: Checkout submodules
+        run: git submodule update --init --recursive --remote
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Make the script file executable
+        run: chmod +x build_images.sh
+      - name: Run build script
+        run: ./build_images.sh . ${{ vars.DOCKERHUB_USERNAME }} ${{ steps.buildx.outputs.name }} ${{ inputs.openctiVersion }} ${{ inputs.openctiBuild }} ${{ inputs.openbasVersion }} ${{ inputs.openbasBuild }}
