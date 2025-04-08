@@ -15,9 +15,6 @@ BUILDER_NAME="$3"
 OPENCTI_VERSION="${4:-false}"
 OPENBAS_VERSION="${5:-false}"
 
-MAX_BUILDS=${6:-100}
-SKIP_BUILDS=${7:-0}
-
 # Ensure buildx builder exists
 if ! docker buildx inspect "$BUILDER_NAME" >/dev/null 2>&1; then
     echo "❌ Buildx builder '$BUILDER_NAME' does not exist."
@@ -26,21 +23,30 @@ fi
 
 docker buildx use "$BUILDER_NAME"
 
-# ------------------------
 # Find Dockerfiles recursively
-# ------------------------
 ctr=0
-find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
-    ctr=$((ctr + 1))
-
+find "$BASE_DIR" -type f -name 'Dockerfile' | sort | awk '
+  BEGIN {
+    while ((getline pattern < "filter.txt") > 0) {
+      gsub(/^[[:space:]]+|[[:space:]]+$/, "", pattern);  # trim whitespace
+      patterns[pattern] = 1;
+    }
+  }
+  {
+    for (p in patterns) {
+      if (index($0, p) > 0) {
+        print $0;
+        break;
+      }
+    }
+  }
+' | while read -r dockerfile; do
     service_dir=$(dirname "$dockerfile")
     
     # Filters out directories that shouldn't be parsed
     if [[ "$service_dir" =~ (/templates/|/shared/) ]]; then
-        ctr=$((ctr - 1))
         continue
     fi
-    buildNr=$((ctr - SKIP_BUILDS))
 
     # Extract category and service from the path
     path_parts=(${service_dir//\// })
@@ -62,10 +68,8 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
             SERVICE_PREFIX="injector"
         fi
     fi
-    
-    if ((ctr <= SKIP_BUILDS)); then
-        continue
-    fi
+    ctr=$((ctr + 1))
+    buildNr=$((ctr))
 
     # Create image name
     IMAGE_NAME="${SERVICE_PREFIX}-${SERVICE}"
@@ -74,18 +78,12 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | while read -r dockerfile; do
 
     echo "🔨 Building #${buildNr} $IMAGE_TAG from $service_dir for platforms: $PLATFORMS"
 
-    docker buildx build \
-        --builder "$BUILDER_NAME" \
-        --platform "$PLATFORMS" \
-        -t "$IMAGE_TAG" \
-        --push \
-        "$service_dir"
+    #docker buildx build \
+    #    --builder "$BUILDER_NAME" \
+    #    --platform "$PLATFORMS" \
+    #    -t "$IMAGE_TAG" \
+    #    --push \
+    #    "$service_dir"
 
     echo "✅ Successfully built #${buildNr} and pushed $IMAGE_TAG"
-
-    if (((ctr - SKIP_BUILDS) >= MAX_BUILDS)); then
-        tmp=$((ctr - SKIP_BUILDS))
-        echo "🛑 Stopping due to max builds reached."
-        break
-    fi
 done
