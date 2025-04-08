@@ -21,16 +21,6 @@ on:
         description: 'If OpenBAS images should be build'
         required: false
         type: boolean
-      maxBuild:
-        description: 'MAX images to build'
-        required: false
-        default: "100"
-        type: string
-      skipBuild:
-        description: 'Skip the first x builds'
-        required: false
-        default: "0"
-        type: string
       
 
 
@@ -66,4 +56,4 @@ jobs:
       - name: Make the script file executable
         run: chmod +x build_images.sh
       - name: Run build script
-        run: ./build_images.sh . ${{ vars.DOCKERHUB_USERNAME }} ${{ steps.buildx.outputs.name }} ${{ inputs.openctiVersion }} ${{ inputs.openbasVersion }} ${{ inputs.maxBuild }} ${{ inputs.skipBuild }}
+        run: ./build_images.sh . ${{ vars.DOCKERHUB_USERNAME }} ${{ steps.buildx.outputs.name }} ${{ inputs.openctiVersion }} ${{ inputs.openbasVersion }}
