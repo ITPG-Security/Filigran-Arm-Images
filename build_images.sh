@@ -78,12 +78,12 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | sort | awk '
 
     echo "🔨 Building #${buildNr} $IMAGE_TAG from $service_dir for platforms: $PLATFORMS"
 
-    #docker buildx build \
-    #    --builder "$BUILDER_NAME" \
-    #    --platform "$PLATFORMS" \
-    #    -t "$IMAGE_TAG" \
-    #    --push \
-    #    "$service_dir"
+    docker buildx build \
+        --builder "$BUILDER_NAME" \
+        --platform "$PLATFORMS" \
+        -t "$IMAGE_TAG" \
+        --push \
+        "$service_dir"
 
     echo "✅ Successfully built #${buildNr} and pushed $IMAGE_TAG"
 done
