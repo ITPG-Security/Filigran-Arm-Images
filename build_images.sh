@@ -56,13 +56,13 @@ find "$BASE_DIR" -type f -name 'Dockerfile' | sort | awk '
     if [ "${path_parts[1]}" == "OpenCTI" ]; then
         ORIGIONAL_REPO="opencti"
         IMAGE_VERSION=$OPENCTI_VERSION
-        if [ "${path_parts[2]}" == "Connectors" ]; then
+        if [ "${path_parts[2]}" == "connectors" ]; then
             SERVICE_PREFIX="connector"
         fi
     else
         ORIGIONAL_REPO="openbas"
         IMAGE_VERSION=$OPENBAS_VERSION
-        if [ "${path_parts[2]}" == "Collectors" ]; then
+        if [ "${path_parts[2]}" == "collectors" ]; then
             SERVICE_PREFIX="collector"
         else
             SERVICE_PREFIX="injector"

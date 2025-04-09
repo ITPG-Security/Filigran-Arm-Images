@@ -36,13 +36,13 @@ jobs:
           fetch-depth: 0
       - name: Obtain OpenCTI Connectors
         if: ${{ inputs.openctiBuild }}
-        run: git clone --branch ${{ inputs.openctiVersion }} --single-branch https://github.com/OpenCTI-Platform/connectors.git
+        run: git clone --branch ${{ inputs.openctiVersion }} --single-branch https://github.com/OpenCTI-Platform/connectors.git ./OpenCTI/connectors
       - name: Obtain OpenBAS Collectors
         if: ${{ inputs.openbasBuild }}
-        run: git clone --branch ${{ inputs.openbasVersion }} --single-branch https://github.com/OpenBAS-Platform/collectors.git
+        run: git clone --branch ${{ inputs.openbasVersion }} --single-branch https://github.com/OpenBAS-Platform/collectors.git ./OpenBAS/collectors
       - name: Obtain OpenBAS Injectors
         if: ${{ inputs.openbasBuild }}
-        run: git clone --branch ${{ inputs.openbasVersion }} --single-branch https://github.com/OpenBAS-Platform/injectors.git
+        run: git clone --branch ${{ inputs.openbasVersion }} --single-branch https://github.com/OpenBAS-Platform/injectors.git ./OpenBAS/injectors
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
